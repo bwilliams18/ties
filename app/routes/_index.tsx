@@ -112,6 +112,7 @@ export default function Index() {
   const [cards, setCards] = useState([]);
   const [solvedCategories, setSolvedCategories] = useState([]);
   const [guesses, setGuesses] = useState([]);
+  const [hints, setHints] = useState(0);
   useEffect(() => {
     if (!localStorage) return;
     const savedCategories =
@@ -124,22 +125,13 @@ export default function Index() {
       (JSON.parse(localStorage.getItem("guesses")) || {})?.[date] || []
     );
   }, [date]);
-  const saveToLocalStorage = () => {
-    if (!localStorage) return;
-    const savedGuesses = JSON.parse(localStorage.getItem("guesses")) || {};
-    const savedCategories =
-      JSON.parse(localStorage.getItem("solvedCategories")) || {};
-    localStorage.setItem(
-      "guesses",
-      JSON.stringify({ ...savedGuesses, [date]: guesses })
-    );
-    localStorage.setItem(
-      "solvedCategories",
-      JSON.stringify({ ...savedCategories, [date]: solvedCategories })
-    );
-  };
   useEffect(() => {
-    fetch(`/puzzle/${date}.json`).then(async response => {
+    // check if development or production
+    fetch(
+      ("http://localhost:5173" === window.location.origin
+        ? "http://localhost:2120"
+        : "") + `/puzzle/${date}.json`
+    ).then(async response => {
       const data = await response.json();
       setPuzzle(data);
       const cards = data.categories
@@ -154,6 +146,9 @@ export default function Index() {
         ?.flat()
         ?.sort((a, b) => a.position - b.position);
       setCards(cards);
+      setSolvedCategories([]);
+      setGuesses([]);
+      setHints(0);
     });
   }, [date]);
 
@@ -176,6 +171,7 @@ export default function Index() {
         category.cards.map(card => card.id).includes(card.id)
       )
   );
+  const numberIncorrect = guesses.length - solvedCategories.length;
   // days between 2023-06-12 and selected date
   return (
     <div className="font-sans p-4 container mx-auto">
@@ -192,7 +188,12 @@ export default function Index() {
             title="date"
             type="date"
             value={date}
-            onChange={e => setDate(e.target.value)}
+            onChange={e => {
+              setDate(e.target.value);
+              setHints(0);
+              setSolvedCategories([]);
+              setGuesses([]);
+            }}
             min="2023-06-12"
             max={new Date().toISOString().split("T")[0]}
           />
@@ -356,6 +357,38 @@ export default function Index() {
           ">
           Reset
         </button>
+        {numberIncorrect > 4 && (
+          <div className="flex flex-col grow col-span-2">
+            <div className="flex flex-col gap-2 mb-2">
+              {puzzle?.categories
+                ?.map((category, idx) => ({ ...category, level: idx }))
+                ?.filter(
+                  category =>
+                    !solvedCategories
+                      .map(category => category.title)
+                      .some(title => category.title === title)
+                )
+                ?.slice(0, hints)
+                .map(category => (
+                  <div
+                    className={`rounded p-2 justify-center items-center flex flex-col ${
+                      categoryColors[category.level]
+                    }`}>
+                    <h2 className="text-xl font-bold">
+                      {toTitleCase(category.title)}
+                    </h2>
+                  </div>
+                ))}
+            </div>
+            <button
+              onClick={() => {
+                setHints(hints => hints + 1);
+              }}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded grow disabled:opacity-50 disabled:cursor-not-allowed">
+              Get Hint
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
