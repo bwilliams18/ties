@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.text-fit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 400px;
+  margin: auto;
+}
+
+.grid-item {
+  background-color: #ccc;
+  border: 1px solid #999;
+  padding: 20px;
+  text-align: center;
+  user-select: none;
+  cursor: pointer; /* Add a cursor pointer for clickable items */
+}
+
+.grid-item.selected {
+  background-color: #6fa3ef; /* Background color for selected item */
+}
