@@ -130,29 +130,54 @@ function findPangrams(foundWords: string[], letters: string[]) {
 export default function BeeSolver() {
   const [hintsInput, setHintsInput] = useState<string>("");
   const [foundBulkInput, setFoundBulkInput] = useState<string>("");
+  const [date, setDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
   const [distributionOption, setDistributionOption] =
     useState<string>("remaining");
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [foundWordInput, setFoundWordInput] = useState<string>("");
+  useEffect(() => {
+    if (!localStorage) return;
+    const savedData = localStorage.getItem("beeSolver");
+    if (savedData) {
+      const { hintsInput, foundWords } = JSON.parse(savedData)?.[date] || {};
+      if (hintsInput) {
+        setHintsInput(hintsInput);
+      }
+      if (foundWords) {
+        setFoundWords(foundWords);
+      }
+    }
+  }, [date]);
   const { letters, stats, distribution, twoLetterList, distributionHeader } =
     useMemo(() => {
       return parseHintsInput(hintsInput);
     }, [hintsInput]);
-  useEffect(
-    () =>
-      setFoundWords(existingWords => [
+  useEffect(() => {
+    if (foundBulkInput.endsWith("\n")) {
+      const newWords = [
         ...new Set([
           ...foundBulkInput
             .trim()
             .split("\n")
             .map(word => word.trim())
             .filter(word => word),
-          ...existingWords,
+          ...foundWords,
         ]),
-      ]),
-    [foundBulkInput]
-  );
-
+      ].filter(word =>
+        word.split("").every(letter => letters.includes(letter.toUpperCase()))
+      ); // ensure each letter in each word is in the letters;;
+      setFoundWords(newWords);
+      if (localStorage) {
+        const savedData = localStorage.getItem("beeSolver");
+        const data = savedData ? JSON.parse(savedData) : {};
+        data[date] = { hintsInput, foundWords: newWords };
+        localStorage.setItem("beeSolver", JSON.stringify(data));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [foundBulkInput]);
   const foundTwoLetters: TwoLetterList = useMemo(
     () => findTwoLetterWords(foundWords, twoLetterList),
     [foundWords, twoLetterList]
@@ -183,6 +208,25 @@ export default function BeeSolver() {
           <TabPanel className="bg-yellow-100 px-4 py-2 rounded-lg rounded-tl-none">
             <div className="flex flex-col">
               <label
+                htmlFor="dateInput"
+                className="text-lg font-bold text-center">
+                Date
+              </label>
+              <span className="text-xs text-gray-500 italic">
+                {"Enter the date of the puzzle you're solving"}
+              </span>
+              <input
+                value={date}
+                type="date"
+                id="dateInput"
+                className="mb-4 border-2 border-gray-300 p-1 rounded"
+                onChange={e => {
+                  setDate(e.target.value);
+                  setHintsInput("");
+                  setFoundBulkInput("");
+                }}
+              />
+              <label
                 htmlFor="hintsInput"
                 className="text-lg font-bold text-center">
                 Hints
@@ -204,7 +248,9 @@ export default function BeeSolver() {
                 Found Words
               </label>
               <span className="text-xs text-gray-500 italic">
-                {"Enter the words you've already found, one per line"}
+                {
+                  "Enter the words you've already found, one per line, include an extra newline at the end"
+                }
               </span>
               <textarea
                 value={foundBulkInput}
@@ -241,6 +287,15 @@ export default function BeeSolver() {
                   onKeyPress={e => {
                     if (e.key === "Enter") {
                       setFoundWords([...foundWords, foundWordInput]);
+                      if (localStorage) {
+                        const savedData = localStorage.getItem("beeSolver");
+                        const data = savedData ? JSON.parse(savedData) : {};
+                        data[date] = {
+                          hintsInput,
+                          foundWords: [...foundWords, foundWordInput],
+                        };
+                        localStorage.setItem("beeSolver", JSON.stringify(data));
+                      }
                       setFoundWordInput("");
                     }
                   }}
@@ -249,6 +304,15 @@ export default function BeeSolver() {
                   className="bg-yellow-400 text-white rounded px-2 py-1"
                   onClick={() => {
                     setFoundWords([...foundWords, foundWordInput]);
+                    if (localStorage) {
+                      const savedData = localStorage.getItem("beeSolver");
+                      const data = savedData ? JSON.parse(savedData) : {};
+                      data[date] = {
+                        hintsInput,
+                        foundWords: [...foundWords, foundWordInput],
+                      };
+                      localStorage.setItem("beeSolver", JSON.stringify(data));
+                    }
                     setFoundWordInput("");
                   }}>
                   Add Word
