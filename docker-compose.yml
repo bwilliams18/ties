@@ -1,9 +1,5 @@
 services:
   web:
     build: .
-    develop:
-     watch:
-      - action: rebuild
-        path: .
     ports:
-      - "2120:80"
+      - "$PORT:80"
