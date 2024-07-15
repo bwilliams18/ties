@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+import {
+  Tab,
+  TabGroup,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+} from "@headlessui/react";
 import { toTitleCase } from "~/util";
-
 // interface Stats {
 //   words: number;
 //   points: number;
@@ -194,7 +203,28 @@ export default function BeeSolver() {
   );
   return (
     <div className="font-sans container mx-auto max-w-3xl">
-      <h1 className="text-4xl font-bold text-center mb-4">BeeSolver</h1>
+      <div className="flex justify-between items-center m-2">
+        <Menu>
+          <MenuButton className="bg-gray-300 text-xl px-2 py-1">🍔</MenuButton>
+          <MenuItems
+            anchor="bottom"
+            className="bg-white drop-shadow-lg border border-gray-200 rounded flex flex-col gap-1">
+            <MenuItem>
+              <a className="block data-[focus]:bg-yellow-200 p-1" href="/">
+                Home
+              </a>
+            </MenuItem>
+            <MenuItem>
+              <a
+                className="block data-[focus]:bg-yellow-200 p-1"
+                href="/connections">
+                Connections
+              </a>
+            </MenuItem>
+          </MenuItems>
+        </Menu>
+        <h1 className="text-4xl font-bold text-center grow">Bee Solver</h1>
+      </div>
       <TabGroup className="m-2">
         <TabList className="flex">
           <Tab className="data-[selected]:bg-yellow-100 bg-gray-200 px-2 py-1 font-bold text-lg rounded-t shadow-inner">

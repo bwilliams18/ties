@@ -1,7 +1,17 @@
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  Tab,
+  TabGroup,
+  TabList,
+  TabPanel,
+  TabPanels,
+} from "@headlessui/react";
 import { useEffect, useState } from "react";
 import { toTitleCase } from "~/util";
 
@@ -56,21 +66,6 @@ function SortableItem({ item, handleClick, isSelected }: SortableItemProps) {
     isDragging,
   } = useSortable({ id: item.id });
   const [dragTime, setDragTime] = useState(0);
-  //height equal to width
-  useEffect(() => {
-    const handleTouchMove = event => {
-      if (event.touches.length > 1) {
-        return; // Allow default behavior if there's more than one touch point
-      }
-      event.preventDefault(); // Prevent scrolling
-    };
-
-    document.addEventListener("touchmove", handleTouchMove, { passive: false });
-
-    return () => {
-      document.removeEventListener("touchmove", handleTouchMove);
-    };
-  }, []);
   return (
     <div
       ref={setNodeRef}
@@ -196,6 +191,20 @@ export default function Connections() {
       });
     }
   };
+  useEffect(() => {
+    const handleTouchMove = (event: TouchEvent) => {
+      if (event.touches.length > 1) {
+        return; // Allow default behavior if there's more than one touch point
+      }
+      event.preventDefault(); // Prevent scrolling
+    };
+
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    return () => {
+      document.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, []);
   const activeCards = cards?.filter(
     card =>
       !solvedCategories.some(category =>
@@ -206,16 +215,37 @@ export default function Connections() {
   // days between 2023-06-12 and selected date
   return (
     <div className="font-sans container mx-auto max-w-3xl">
-      <h1 className="text-4xl font-bold text-center mb-4">Connections</h1>
+      <div className="flex justify-between items-center m-2">
+        <Menu>
+          <MenuButton className=" bg-gray-300 text-xl px-2 py-1">🍔</MenuButton>
+          <MenuItems
+            anchor="bottom"
+            className="bg-white drop-shadow-lg border border-gray-200 rounded flex flex-col gap-1">
+            <MenuItem>
+              <a className="block data-[focus]:bg-purple-200 p-1" href="/">
+                Home
+              </a>
+            </MenuItem>
+            <MenuItem>
+              <a
+                className="block data-[focus]:bg-purple-200 p-1"
+                href="/beesolver">
+                Bee Solver
+              </a>
+            </MenuItem>
+          </MenuItems>
+        </Menu>
+        <h1 className="text-4xl font-bold text-center grow">Connections</h1>
+      </div>
       <TabGroup className="m-2">
-        {/* <TabList className="flex">
+        <TabList className="flex">
           <Tab className="data-[selected]:bg-purple-200 bg-gray-200 px-2 py-1 font-bold text-lg rounded-t shadow-inner">
             Play
           </Tab>
-          <Tab className="data-[selected]:bg-purple-200 bg-gray-200 px-2 py-1 font-bold text-lg rounded-t shadow-inner">
+          {/* <Tab className="data-[selected]:bg-purple-200 bg-gray-200 px-2 py-1 font-bold text-lg rounded-t shadow-inner">
             Archive
-          </Tab>
-        </TabList> */}
+          </Tab> */}
+        </TabList>
         <TabPanels>
           <TabPanel className="bg-purple-200 px-4 py-2 rounded-lg rounded-tl-none">
             {" "}
