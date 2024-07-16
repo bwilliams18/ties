@@ -3,3 +3,4 @@ services:
     build: .
     ports:
       - "$PORT:80"
+    restart: always
