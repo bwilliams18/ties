@@ -1,5 +1,6 @@
 services:
   web:
+    image: docker.clarach.cloud/ties:latest
     build: .
     ports:
       - "$PORT:80"
